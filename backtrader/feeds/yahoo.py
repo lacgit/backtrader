@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2020 Daniel Rodriguez
+# Copyright (C) 2015-2023 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
 ###############################################################################
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
+
+import requests
 
 import collections
 from datetime import date, datetime
@@ -250,14 +252,53 @@ class YahooFinanceData(YahooFinanceCSVData):
         ('retries', 3),
     )
 
+    def get_yahoo_cookie(self):
+        cookie = None
+
+        user_agent_key = "User-Agent"
+        user_agent_value = "Mozilla/5.0 (Windows NT 6.1; Win64; x64)"
+
+        headers = {user_agent_key: user_agent_value}
+        response = requests.get(
+            "https://fc.yahoo.com", headers=headers, allow_redirects=True
+        )
+
+        if not response.cookies:
+            raise Exception("Failed to obtain Yahoo auth cookie.")
+
+        cookie = list(response.cookies)[0]
+
+        return cookie
+
+    def get_yahoo_crumb(self, cookie):
+        crumb = None
+
+        user_agent_key = "User-Agent"
+        user_agent_value = "Mozilla/5.0 (Windows NT 6.1; Win64; x64)"
+
+        headers = {user_agent_key: user_agent_value}
+
+        crumb_response = requests.get(
+            "https://query1.finance.yahoo.com/v1/test/getcrumb",
+            headers=headers,
+            cookies={cookie.name: cookie.value},
+            allow_redirects=True,
+        )
+        crumb = crumb_response.text
+
+        if crumb is None:
+            raise Exception("Failed to retrieve Yahoo crumb.")
+
+        return crumb
+
     def start_v7(self):
-        try:
-            import requests
-        except ImportError:
-            msg = ('The new Yahoo data feed requires to have the requests '
-                   'module installed. Please use pip install requests or '
-                   'the method of your choice')
-            raise Exception(msg)
+    #   try:
+    #       import requests
+    #   except ImportError:
+    #       msg = ('The new Yahoo data feed requires to have the requests '
+    #              'module installed. Please use pip install requests or '
+    #              'the method of your choice')
+    #       raise Exception(msg)
 
         self.error = None
         url = self.p.urlhist.format(self.p.dataname)
@@ -267,31 +308,38 @@ class YahooFinanceData(YahooFinanceCSVData):
             sesskwargs['proxies'] = self.p.proxies
 
         crumb = None
+
+        cookie = self.get_yahoo_cookie()
+        crumb = self.get_yahoo_crumb(cookie)
+
+        ##
         sess = requests.Session()
-        sess.headers['User-Agent'] = 'backtrader'
-        for i in range(self.p.retries + 1):  # at least once
-            resp = sess.get(url, **sesskwargs)
-            if resp.status_code != requests.codes.ok:
-                continue
+        sess.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'
+    #   for i in range(self.p.retries + 1):  # at least once
+    #       resp = sess.get(url, **sesskwargs)
+    #       if resp.status_code != requests.codes.ok:
+    #           continue
 
-            txt = resp.text
-            i = txt.find('CrumbStore')
-            if i == -1:
-                continue
-            i = txt.find('crumb', i)
-            if i == -1:
-                continue
-            istart = txt.find('"', i + len('crumb') + 1)
-            if istart == -1:
-                continue
-            istart += 1
-            iend = txt.find('"', istart)
-            if iend == -1:
-                continue
+    #       txt = resp.text
+    #       i = txt.find('CrumbStore')
+    #       if i == -1:
+    #           continue
+    #       i = txt.find('crumb', i)
+    #       if i == -1:
+    #           continue
+    #       istart = txt.find('"', i + len('crumb') + 1)
+    #       if istart == -1:
+    #           continue
+    #       istart += 1
+    #       iend = txt.find('"', istart)
+    #       if iend == -1:
+    #           continue
 
-            crumb = txt[istart:iend]
-            crumb = crumb.encode('ascii').decode('unicode-escape')
-            break
+    #       crumb = txt[istart:iend]
+    #       crumb = crumb.encode('ascii').decode('unicode-escape')
+    #       break
+
+        ##
 
         if crumb is None:
             self.error = 'Crumb not found'
