@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2020 Daniel Rodriguez
+# Copyright (C) 2015-2023 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -72,15 +72,15 @@ def parse_args():
         description='Calendar Days Filter Sample')
 
     parser.add_argument('--data', '-d',
-                        default='YHOO',
+                        default='GOOG',
                         help='Ticker to download from Yahoo')
 
     parser.add_argument('--fromdate', '-f',
-                        default='2006-01-01',
+                        default='2022-01-01',
                         help='Starting date in YYYY-MM-DD format')
 
     parser.add_argument('--todate', '-t',
-                        default='2006-12-31',
+                        default='2023-12-31',
                         help='Starting date in YYYY-MM-DD format')
 
     parser.add_argument('--period', default=15, type=int,
