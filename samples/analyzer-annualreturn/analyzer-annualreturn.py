@@ -29,6 +29,7 @@ import backtrader as bt
 import backtrader.feeds as btfeeds
 import backtrader.indicators as btind
 from backtrader.analyzers import (SQN, AnnualReturn, TimeReturn, SharpeRatio,
+                                  DrawDown, TimeDrawDown,
                                   TradeAnalyzer)
 
 
@@ -167,6 +168,8 @@ def runstrategy():
         cerebro.addanalyzer(SharpeRatio, timeframe=tframes[args.tframe])
 
     cerebro.addanalyzer(TradeAnalyzer)
+    cerebro.addanalyzer(DrawDown)
+    cerebro.addanalyzer(TimeDrawDown)
 
     cerebro.addwriter(bt.WriterFile, csv=args.writercsv, rounding=4)
 
