@@ -131,17 +131,17 @@ def parse_args(pargs=None):
         )
     )
 
-    parser.add_argument('--data0', default='YHOO',
+    parser.add_argument('--data0', default='GOOG',
                         required=False, help='Data to read in')
 
     parser.add_argument('--offline', required=False, action='store_true',
                         help='Read from disk with same name as ticker')
 
     # Defaults for dates
-    parser.add_argument('--fromdate', required=False, default='2016-01-01',
+    parser.add_argument('--fromdate', required=False, default='2023-01-01',
                         help='Date[time] in YYYY-MM-DD[THH:MM:SS] format')
 
-    parser.add_argument('--todate', required=False, default='2016-12-31',
+    parser.add_argument('--todate', required=False, default='2023-12-31',
                         help='Date[time] in YYYY-MM-DD[THH:MM:SS] format')
 
     parser.add_argument('--cerebro', required=False, default='',
